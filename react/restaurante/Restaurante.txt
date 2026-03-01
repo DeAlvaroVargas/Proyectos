@@ -1,0 +1,9 @@
+Componentes: 			|
+-listado de la carta		|
+- El pedido			|
+- Total de pedido		|
+- Propina				|
+---------------------------------|
+
+useState
+useEffect

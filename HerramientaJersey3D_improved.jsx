@@ -627,14 +627,18 @@ export function HerramientaJersey3D() {
                     if (shouldStripe) {
                       float u;
                       if (uStripeMode == 1) {
-                        // Rayas verticales: proyección en eje X mundo
-                        u = (vWorldPos.x - uBBoxCenter.x + uBBoxHalf.x) / (2.0 * uBBoxHalf.x);
+                        // Rayas verticales SIMÉTRICAS: espejamos X con abs()
+                        // para garantizar que izquierda = derecha siempre.
+                        // abs() hace que 0 = centro, 1 = borde (ambos lados).
+                        float nx = abs(vWorldPos.x - uBBoxCenter.x) / uBBoxHalf.x;
+                        u = nx * uStripeCount * 0.5;
                       } else {
                         // Rayas horizontales: proyección en eje Y mundo
                         u = (vWorldPos.y - uBBoxCenter.y + uBBoxHalf.y) / (2.0 * uBBoxHalf.y);
+                        u = u * uStripeCount;
                       }
                       // Bordes suavizados (anti-aliasing)
-                      float stripe = fract(u * uStripeCount);
+                      float stripe = fract(u);
                       float pattern = smoothstep(0.47, 0.53, stripe);
                       diffuseColor.rgb = mix(uPrimary, uSecondary, pattern);
                     } else {
@@ -646,7 +650,7 @@ export function HerramientaJersey3D() {
 
               mat.userData.shader = shader
             }
-            mat.customProgramCacheKey = () => 'jersey_planar_v2'
+            mat.customProgramCacheKey = () => 'jersey_planar_v3'
             mat.needsUpdate = true
             jerseyMatsRef.current.push(mat)
           })

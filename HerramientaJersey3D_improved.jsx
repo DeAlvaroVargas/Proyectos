@@ -85,9 +85,16 @@ const JERSEY_PATH = 'M35,8 Q50,18 65,8 L90,2 L108,26 L90,32 L90,98 L10,98 L10,32
 function JerseyZoneSVG({ zone = 'full', size = 38 }) {
   const z = ZONES[zone] || ZONES.full
   return (
-    <svg width={size} height={size * 1.05} viewBox="-10 0 120 108" fill="none" className="shrink-0">
-      <path d={JERSEY_PATH} fill="#1c1c28" stroke="#ffffff18" strokeWidth="2.5" strokeLinejoin="round" />
-      <rect x={z.x} y={z.y} width={z.w} height={z.h} fill="#e63946" opacity="0.55" rx="3" />
+    <svg width={size} height={size * 1.05} viewBox="-10 0 120 108" fill="none" className="shrink-0 drop-shadow-[0_0_4px_rgba(230,57,70,0.15)]">
+      <defs>
+        <linearGradient id={`zone-${zone}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1e1e2e" />
+          <stop offset="100%" stopColor="#12121a" />
+        </linearGradient>
+      </defs>
+      <path d={JERSEY_PATH} fill={`url(#zone-${zone})`} stroke="#ffffff15" strokeWidth="2" strokeLinejoin="round" />
+      <rect x={z.x} y={z.y} width={z.w} height={z.h} fill="#e63946" opacity="0.45" rx="4" />
+      <rect x={z.x} y={z.y} width={z.w} height={z.h} fill="none" stroke="#e63946" strokeWidth="0.8" opacity="0.6" rx="4" />
     </svg>
   )
 }
@@ -250,18 +257,19 @@ function makeSponsorCanvas({ mainText, subText, font, color, subColor }) {
 }
 
 // ── UI atoms ──────────────────────────────────────────────────────────────────
-const labelCls = 'block text-[8px] font-black text-white/25 tracking-[0.26em] uppercase mb-1.5'
-const inputCls = 'w-full px-3 py-2.5 rounded-xl bg-[#0a0a0d] border border-white/6 text-white text-[13px] focus:outline-none focus:border-[#e63946]/70 transition-all placeholder:text-white/15'
+const labelCls = 'block text-[8px] font-black text-white/30 tracking-[0.26em] uppercase mb-1.5'
+const inputCls = 'w-full px-3 py-2.5 rounded-xl bg-[#08080b] border border-white/8 text-white text-[13px] focus:outline-none focus:border-[#e63946]/70 focus:shadow-[0_0_12px_rgba(230,57,70,0.15)] transition-all duration-300 placeholder:text-white/20'
 
 function ColorSwatch({ label, value, onChange }) {
   return (
     <div>
       {label && <span className={labelCls}>{label}</span>}
-      <div className="relative h-9 rounded-xl overflow-hidden border border-white/8 cursor-pointer group">
+      <div className="relative h-10 rounded-xl overflow-hidden border border-white/10 cursor-pointer group hover:scale-[1.02] transition-all duration-300">
         <input type="color" value={value} onChange={e => onChange(e.target.value)}
           className="absolute inset-0 w-full h-full cursor-pointer opacity-0 z-10" />
         <div className="absolute inset-0 pointer-events-none rounded-xl" style={{ backgroundColor: value }} />
-        <div className="absolute inset-0 pointer-events-none rounded-xl ring-1 ring-inset ring-white/10 group-hover:ring-white/20" />
+        <div className="absolute inset-0 pointer-events-none rounded-xl ring-1 ring-inset ring-white/10 group-hover:ring-white/30 group-hover:shadow-[0_0_16px_rgba(255,255,255,0.06)]" />
+        <div className="absolute bottom-1 right-1.5 text-[7px] font-mono text-white/40 pointer-events-none mix-blend-difference">{value}</div>
       </div>
     </div>
   )
@@ -272,12 +280,12 @@ function Slider({ label, value, min, max, step = 1, onChange, unit = '' }) {
     <div className="space-y-1.5">
       <div className="flex justify-between items-center">
         <span className={labelCls}>{label}</span>
-        <span className="text-[9px] font-mono text-[#e63946]/80">{typeof value === 'number' && step < 1 ? value.toFixed(1) : value}{unit}</span>
+        <span className="text-[9px] font-mono text-[#e63946] bg-[#e63946]/10 px-1.5 py-0.5 rounded-md">{typeof value === 'number' && step < 1 ? value.toFixed(1) : value}{unit}</span>
       </div>
       <input type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(step < 1 ? parseFloat(e.target.value) : +e.target.value)}
         onWheel={e => e.currentTarget.blur()}
-        className="w-full h-1 rounded-full appearance-none cursor-pointer"
+        className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/8"
         style={{ accentColor: '#e63946' }} />
     </div>
   )
@@ -304,10 +312,10 @@ function TemplateThumbnail({ tpl, active, primary, secondary, stripeCount = 6, o
   }, [tpl.id, primary, secondary, stripeCount])
   return (
     <button onClick={onClick}
-      className={`relative flex flex-col items-center gap-1.5 p-1 rounded-xl border-2 transition-all ${active ? 'border-[#e63946] shadow-[0_0_0_2px_rgba(230,57,70,0.25)]' : 'border-white/8 hover:border-white/20'}`}>
+      className={`relative flex flex-col items-center gap-1.5 p-1.5 rounded-xl border-2 transition-all duration-200 hover:scale-[1.04] ${active ? 'border-[#e63946] shadow-[0_0_12px_rgba(230,57,70,0.25)] bg-[#e63946]/5' : 'border-white/8 hover:border-white/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.3)]'}`}>
       <canvas ref={ref} className="rounded-lg w-full aspect-[7/9] object-cover" style={{ imageRendering: 'auto' }} />
-      <span className="text-[8px] font-bold text-white/40 leading-tight text-center">{tpl.label}</span>
-      {active && <div className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#e63946] border border-white/50" />}
+      <span className="text-[8px] font-bold text-white/45 leading-tight text-center">{tpl.label}</span>
+      {active && <div className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#e63946] border border-white/50 shadow-[0_0_6px_rgba(230,57,70,0.5)]" />}
     </button>
   )
 }
@@ -344,22 +352,22 @@ function ProjectPickerModal({ onSelect, onClose }) {
   const filtered = projects.filter(p => !search || p.name?.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-[#0f0f14] border border-white/10 rounded-2xl w-full max-w-2xl flex flex-col shadow-2xl overflow-hidden" style={{ maxHeight: '80vh' }}>
+      <div className="bg-gradient-to-b from-[#111118] to-[#0c0c12] border border-white/10 rounded-2xl w-full max-w-2xl flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.7)] overflow-hidden" style={{ maxHeight: '80vh' }}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 shrink-0">
           <div>
-            <p className="text-[13px] font-black uppercase tracking-[0.2em] text-white">Mis Proyectos</p>
+            <p className="text-[13px] font-black uppercase tracking-[0.2em] bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">Mis Proyectos</p>
             <p className="text-[9px] text-white/30 mt-0.5">Selecciona el diseño que quieres usar como escudo</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/8 text-white/30 hover:text-white transition-all"><X size={15} /></button>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/8 text-white/30 hover:text-white transition-all duration-200"><X size={15} /></button>
         </div>
-        <div className="px-4 py-3 border-b border-white/5 shrink-0">
+        <div className="px-4 py-3 border-b border-white/6 shrink-0">
           <div className="relative">
             <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Buscar proyecto..." autoFocus
-              className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#0a0a0d] border border-white/8 text-white text-[12px] placeholder:text-white/20 focus:outline-none focus:border-[#e63946]/60 transition-all" />
+              className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[#08080b] border border-white/8 text-white text-[12px] placeholder:text-white/20 focus:outline-none focus:border-[#e63946]/60 focus:shadow-[0_0_12px_rgba(230,57,70,0.12)] transition-all duration-300" />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-4">
@@ -379,11 +387,11 @@ function ProjectPickerModal({ onSelect, onClose }) {
                 const url = getPreviewUrl(p)
                 return (
                   <button key={p.id} onClick={() => onSelect(p)}
-                    className="group flex flex-col gap-1.5 rounded-xl border border-white/8 hover:border-[#e63946]/50 bg-white/2 hover:bg-[#e63946]/5 p-2 transition-all text-left">
-                    <div className="w-full aspect-square rounded-lg bg-[#0a0a0d] border border-white/5 overflow-hidden flex items-center justify-center">
+                    className="group flex flex-col gap-1.5 rounded-xl border border-white/8 hover:border-[#e63946]/40 bg-white/[0.02] hover:bg-[#e63946]/5 p-2 transition-all duration-200 text-left hover:scale-[1.03] hover:shadow-[0_4px_16px_rgba(230,57,70,0.1)]">
+                    <div className="w-full aspect-square rounded-lg bg-[#08080b] border border-white/6 overflow-hidden flex items-center justify-center">
                       {url ? <img src={url} alt={p.name} className="w-full h-full object-contain" /> : <FolderOpen size={20} className="text-white/15" />}
                     </div>
-                    <p className="text-[9px] font-semibold text-white/50 group-hover:text-white/80 transition-colors leading-tight truncate">{p.name || 'Sin nombre'}</p>
+                    <p className="text-[9px] font-semibold text-white/50 group-hover:text-white/80 transition-colors duration-200 leading-tight truncate">{p.name || 'Sin nombre'}</p>
                   </button>
                 )
               })}
@@ -937,24 +945,24 @@ export function HerramientaJersey3D() {
   const AccSection = ({ id, zone, title, badge, toggle, toggled, children }) => {
     const open = openSection === id
     return (
-      <div className="bg-[#111114] border border-white/8 rounded-2xl overflow-hidden">
+      <div className={`bg-gradient-to-b from-[#131318] to-[#0f0f14] border rounded-2xl overflow-hidden transition-all duration-300 ${open ? 'border-[#e63946]/20 shadow-[0_0_20px_rgba(230,57,70,0.06)]' : 'border-white/8 hover:border-white/12'}`}>
         <button onClick={() => toggleSection(id)}
-          className="w-full flex items-center gap-3 px-3.5 py-3.5 hover:bg-white/3 transition-all">
+          className="w-full flex items-center gap-3 px-3.5 py-3.5 hover:bg-white/[0.03] transition-all duration-200">
           <JerseyZoneSVG zone={zone} size={36} />
           <div className="flex-1 text-left min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/80 leading-none">{title}</p>
-            {badge && <p className="text-[9px] text-white/28 mt-1 truncate">{badge}</p>}
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/85 leading-none">{title}</p>
+            {badge && <p className="text-[9px] text-white/30 mt-1 truncate font-medium">{badge}</p>}
           </div>
           {toggle !== undefined && (
             <button onClick={e => { e.stopPropagation(); toggled !== undefined && toggle(!toggled) }}
-              className={`p-1 rounded-lg transition-all border shrink-0 ${toggled ? 'bg-[#e63946]/15 border-[#e63946]/30 text-[#e63946] shadow-sm' : 'bg-white/4 border-white/8 text-white/25'}`}>
+              className={`p-1.5 rounded-lg transition-all duration-200 border shrink-0 ${toggled ? 'bg-[#e63946]/15 border-[#e63946]/30 text-[#e63946] shadow-[0_0_8px_rgba(230,57,70,0.2)]' : 'bg-white/4 border-white/8 text-white/25 hover:text-white/40'}`}>
               {toggled ? <Eye size={11} /> : <EyeOff size={11} />}
             </button>
           )}
-          <ChevronRight size={12} className={`text-white/25 transition-transform duration-200 shrink-0 ${open ? 'rotate-90' : ''}`} />
+          <ChevronRight size={12} className={`text-white/30 transition-transform duration-300 shrink-0 ${open ? 'rotate-90 text-[#e63946]/60' : ''}`} />
         </button>
         {open && (
-          <div className="px-3.5 pb-3.5 space-y-3 border-t border-white/5 pt-3">
+          <div className="px-3.5 pb-4 space-y-3 border-t border-white/6 pt-3">
             {children}
           </div>
         )}
@@ -992,31 +1000,33 @@ export function HerramientaJersey3D() {
   const FontSelect = ({ value, onChange }) => (
     <div>
       <span className={labelCls}>Tipografía</span>
-      <select value={value} onChange={e => onChange(e.target.value)} className={inputCls + ' text-[11px]'}>
-        {FONTS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+      <select value={value} onChange={e => onChange(e.target.value)} className={inputCls + ' text-[11px] cursor-pointer hover:border-white/15'}>
+        {FONTS.map(f => <option key={f.value} value={f.value} style={{ background: '#0a0a0d' }}>{f.label}</option>)}
       </select>
     </div>
   )
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#0d0d10] text-white overflow-hidden select-none font-sans">
+    <div className="h-screen w-screen flex flex-col bg-[#0a0a0e] text-white overflow-hidden select-none font-sans">
       {/* Header */}
-      <header className="h-14 shrink-0 flex items-center justify-between px-5 border-b border-white/6 bg-[#080809] z-50">
+      <header className="h-14 shrink-0 flex items-center justify-between px-5 border-b border-white/6 bg-gradient-to-r from-[#080809] via-[#0c0c10] to-[#080809] z-50 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <Link to="/herramientas" className="p-2 hover:bg-white/8 rounded-xl text-white/30 hover:text-[#e63946] transition-all">
+          <Link to="/herramientas" className="p-2 hover:bg-white/8 rounded-xl text-white/30 hover:text-[#e63946] transition-all duration-200 hover:shadow-[0_0_12px_rgba(230,57,70,0.15)]">
             <ChevronLeft size={17} />
           </Link>
-          <div className="w-px h-5 bg-white/8" />
+          <div className="w-px h-6 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
           <div>
-            <p className="text-[12px] font-black tracking-[0.15em] uppercase text-white leading-none">Jersey 3D</p>
-            <p className="text-[9px] text-white/22 mt-0.5">Diseña la equipación · nombre · número · patrón</p>
+            <p className="text-[12px] font-black tracking-[0.2em] uppercase leading-none">
+              <span className="bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">Jersey 3D</span>
+            </p>
+            <p className="text-[9px] text-white/25 mt-0.5 tracking-wide">Diseña la equipación · nombre · número · patrón</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button onClick={resetCamera} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/8 text-white/35 hover:text-white hover:bg-white/10 transition-all text-[10px] font-bold">
+        <div className="flex gap-2.5">
+          <button onClick={resetCamera} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-200 text-[10px] font-bold">
             <RotateCcw size={11} /> Reset
           </button>
-          <button onClick={exportPNG} className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#e63946] hover:bg-[#c12635] text-white text-[10px] font-black tracking-widest uppercase transition-all shadow-[0_4px_16px_rgba(230,57,70,0.35)]">
+          <button onClick={exportPNG} className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-[#e63946] to-[#d42836] hover:from-[#d42836] hover:to-[#c12030] text-white text-[10px] font-black tracking-widest uppercase transition-all duration-200 shadow-[0_4px_20px_rgba(230,57,70,0.4)] hover:shadow-[0_6px_28px_rgba(230,57,70,0.5)] hover:scale-[1.02]">
             <Download size={11} /> Exportar PNG
           </button>
         </div>
@@ -1024,42 +1034,42 @@ export function HerramientaJersey3D() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-[280px] shrink-0 bg-[#09090c] border-r border-white/5 overflow-y-auto flex flex-col gap-2 p-3 min-h-0">
+        <aside className="w-[290px] shrink-0 bg-gradient-to-b from-[#0b0b0f] to-[#08080c] border-r border-white/6 overflow-y-auto flex flex-col gap-2.5 p-3 min-h-0" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e63946 transparent' }}>
 
           {/* Plantillas rápidas */}
-          <div className="bg-[#111114] border border-white/8 rounded-2xl overflow-hidden">
+          <div className="bg-gradient-to-b from-[#131318] to-[#0f0f14] border border-white/8 rounded-2xl overflow-hidden">
             <button onClick={() => toggleSection('presets')}
-              className="w-full flex items-center gap-3 px-3.5 py-3.5 hover:bg-white/3 transition-all">
-              <div className="w-9 h-9 rounded-xl bg-[#e63946]/12 border border-[#e63946]/20 flex items-center justify-center shrink-0">
+              className="w-full flex items-center gap-3 px-3.5 py-3.5 hover:bg-white/[0.03] transition-all duration-200">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#e63946]/20 to-[#e63946]/5 border border-[#e63946]/25 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(230,57,70,0.1)]">
                 <span className="text-base">⚡</span>
               </div>
               <div className="flex-1 text-left">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/80 leading-none">Plantillas rápidas</p>
-                <p className="text-[9px] text-white/28 mt-1">{presets.length} diseños · todos los tipos</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/85 leading-none">Plantillas rápidas</p>
+                <p className="text-[9px] text-white/30 mt-1 font-medium">{presets.length} diseños · todos los tipos</p>
               </div>
-              <ChevronRight size={12} className={`text-white/25 transition-transform duration-200 shrink-0 ${openSection === 'presets' ? 'rotate-90' : ''}`} />
+              <ChevronRight size={12} className={`text-white/30 transition-transform duration-300 shrink-0 ${openSection === 'presets' ? 'rotate-90 text-[#e63946]/60' : ''}`} />
             </button>
             {openSection === 'presets' && (
-              <div className="px-3 pb-3 border-t border-white/5 pt-3">
-                <div className="grid grid-cols-4 gap-1.5 max-h-[55vh] overflow-y-auto pr-0.5"
+              <div className="px-3 pb-3 border-t border-white/6 pt-3">
+                <div className="grid grid-cols-4 gap-2 max-h-[55vh] overflow-y-auto pr-0.5"
                   onWheel={e => e.stopPropagation()}>
                   {presets.map(p => (
                     <div key={p.id} className="relative group/card">
                       <button onClick={() => applyPreset(p)}
-                        className={`w-full flex flex-col items-center gap-1 p-1 rounded-xl border-2 transition-all ${template === p.template && primary === p.primary && secondary === p.secondary ? 'border-[#e63946] shadow-[0_0_0_2px_rgba(230,57,70,0.2)]' : 'border-white/8 hover:border-white/25'}`}>
+                        className={`w-full flex flex-col items-center gap-1 p-1.5 rounded-xl border-2 transition-all duration-200 hover:scale-[1.04] ${template === p.template && primary === p.primary && secondary === p.secondary ? 'border-[#e63946] shadow-[0_0_12px_rgba(230,57,70,0.25)] bg-[#e63946]/5' : 'border-white/8 hover:border-white/20 hover:shadow-[0_2px_12px_rgba(0,0,0,0.3)]'}`}>
                         <div className="w-full aspect-[7/9] rounded-lg overflow-hidden">
                           <PresetThumb preset={p} />
                         </div>
-                        <span className="text-[7.5px] font-bold text-white/40 leading-tight text-center">{p.label}</span>
+                        <span className="text-[7.5px] font-bold text-white/45 leading-tight text-center">{p.label}</span>
                       </button>
                       <button onClick={(e) => deletePreset(p.id, e)}
-                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#e63946] text-white items-center justify-center hidden group-hover/card:flex shadow-md hover:bg-[#c12635] z-10">
-                        <X size={8} />
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#e63946] text-white items-center justify-center hidden group-hover/card:flex shadow-lg hover:bg-[#c12635] hover:scale-110 z-10 transition-all">
+                        <X size={9} />
                       </button>
                     </div>
                   ))}
                   {presets.length === 0 && (
-                    <p className="col-span-4 text-center text-[9px] text-white/20 py-3">Sin plantillas · recarga para restaurar</p>
+                    <p className="col-span-4 text-center text-[9px] text-white/20 py-4">Sin plantillas · recarga para restaurar</p>
                   )}
                 </div>
               </div>
@@ -1087,15 +1097,15 @@ export function HerramientaJersey3D() {
                 <span className={labelCls}>Visibilidad de rayas</span>
                 <div className="grid grid-cols-3 gap-1.5">
                   <button onClick={() => setStripeVisibility(0)}
-                    className={`py-1.5 rounded-lg text-[10px] font-bold border transition-all ${stripeVisibility === 0 ? 'bg-[#e63946]/15 border-[#e63946]/40 text-[#e63946] shadow-sm' : 'bg-white/4 border-white/8 text-white/30 hover:text-white/50'}`}>
+                    className={`py-2 rounded-lg text-[10px] font-bold border transition-all duration-200 ${stripeVisibility === 0 ? 'bg-[#e63946]/15 border-[#e63946]/35 text-[#e63946] shadow-[0_0_8px_rgba(230,57,70,0.15)]' : 'bg-white/[0.03] border-white/8 text-white/30 hover:text-white/50 hover:border-white/15'}`}>
                     Ambos
                   </button>
                   <button onClick={() => setStripeVisibility(1)}
-                    className={`py-1.5 rounded-lg text-[10px] font-bold border transition-all ${stripeVisibility === 1 ? 'bg-[#e63946]/15 border-[#e63946]/40 text-[#e63946] shadow-sm' : 'bg-white/4 border-white/8 text-white/30 hover:text-white/50'}`}>
+                    className={`py-2 rounded-lg text-[10px] font-bold border transition-all duration-200 ${stripeVisibility === 1 ? 'bg-[#e63946]/15 border-[#e63946]/35 text-[#e63946] shadow-[0_0_8px_rgba(230,57,70,0.15)]' : 'bg-white/[0.03] border-white/8 text-white/30 hover:text-white/50 hover:border-white/15'}`}>
                     Delante
                   </button>
                   <button onClick={() => setStripeVisibility(2)}
-                    className={`py-1.5 rounded-lg text-[10px] font-bold border transition-all ${stripeVisibility === 2 ? 'bg-[#e63946]/15 border-[#e63946]/40 text-[#e63946] shadow-sm' : 'bg-white/4 border-white/8 text-white/30 hover:text-white/50'}`}>
+                    className={`py-2 rounded-lg text-[10px] font-bold border transition-all duration-200 ${stripeVisibility === 2 ? 'bg-[#e63946]/15 border-[#e63946]/35 text-[#e63946] shadow-[0_0_8px_rgba(230,57,70,0.15)]' : 'bg-white/[0.03] border-white/8 text-white/30 hover:text-white/50 hover:border-white/15'}`}>
                     Detrás
                   </button>
                 </div>
@@ -1176,7 +1186,7 @@ export function HerramientaJersey3D() {
               <div className="grid grid-cols-2 gap-1.5">
                 {['front','back'].map(s => (
                   <button key={s} onClick={() => setSponsorSide(s)}
-                    className={`py-1.5 rounded-lg text-[10px] font-bold border transition-all ${sponsorSide === s ? 'bg-[#e63946]/15 border-[#e63946]/40 text-[#e63946] shadow-sm' : 'bg-white/4 border-white/8 text-white/30 hover:text-white/50'}`}>
+                    className={`py-2 rounded-lg text-[10px] font-bold border transition-all duration-200 ${sponsorSide === s ? 'bg-[#e63946]/15 border-[#e63946]/35 text-[#e63946] shadow-[0_0_8px_rgba(230,57,70,0.15)]' : 'bg-white/[0.03] border-white/8 text-white/30 hover:text-white/50 hover:border-white/15'}`}>
                     {s === 'front' ? 'Pecho' : 'Espalda'}
                   </button>
                 ))}
@@ -1194,40 +1204,40 @@ export function HerramientaJersey3D() {
               {!logoSrc ? (
                 <div className="space-y-2">
                   <button onClick={() => setShowProjectPicker(true)}
-                    className="w-full flex items-center justify-center gap-2.5 h-16 rounded-xl border-2 border-[#e63946]/30 hover:border-[#e63946]/60 bg-[#e63946]/5 hover:bg-[#e63946]/10 cursor-pointer transition-all group">
-                    <FolderOpen size={16} className="text-[#e63946]/60 group-hover:text-[#e63946] transition-colors" />
+                    className="w-full flex items-center justify-center gap-2.5 h-16 rounded-xl border-2 border-[#e63946]/25 hover:border-[#e63946]/50 bg-gradient-to-br from-[#e63946]/8 to-[#e63946]/3 hover:from-[#e63946]/12 hover:to-[#e63946]/6 cursor-pointer transition-all duration-300 group hover:shadow-[0_0_20px_rgba(230,57,70,0.1)]">
+                    <FolderOpen size={16} className="text-[#e63946]/60 group-hover:text-[#e63946] transition-colors duration-200" />
                     <div className="text-left">
-                      <p className="text-[10px] font-black text-white/70 group-hover:text-white transition-colors">Elegir de Mis Proyectos</p>
+                      <p className="text-[10px] font-black text-white/70 group-hover:text-white transition-colors duration-200">Elegir de Mis Proyectos</p>
                       <p className="text-[8px] text-white/25">Importa un diseño guardado</p>
                     </div>
                   </button>
-                  <label className="flex items-center justify-center gap-2 h-9 rounded-xl border border-dashed border-white/12 hover:border-white/25 cursor-pointer transition-all group bg-white/2">
-                    <Upload size={12} className="text-white/20 group-hover:text-white/40 transition-colors" />
-                    <span className="text-[9px] text-white/25 group-hover:text-white/40 font-medium">O subir archivo (PNG/SVG)</span>
+                  <label className="flex items-center justify-center gap-2 h-10 rounded-xl border border-dashed border-white/12 hover:border-white/25 cursor-pointer transition-all duration-200 group bg-white/[0.02] hover:bg-white/[0.04]">
+                    <Upload size={12} className="text-white/20 group-hover:text-white/40 transition-colors duration-200" />
+                    <span className="text-[9px] text-white/25 group-hover:text-white/45 font-medium transition-colors duration-200">O subir archivo (PNG/SVG)</span>
                     <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                   </label>
                 </div>
               ) : (
                 <div className="relative">
-                  <img src={logoSrc} alt="logo" className="w-full h-24 object-contain rounded-xl bg-white/5 border border-white/8" />
-                  <button onClick={clearLogo} className="absolute top-1.5 right-1.5 p-1 rounded-lg bg-black/60 hover:bg-[#e63946]/80 text-white/50 hover:text-white transition-all">
+                  <img src={logoSrc} alt="logo" className="w-full h-24 object-contain rounded-xl bg-white/[0.03] border border-white/10" />
+                  <button onClick={clearLogo} className="absolute top-1.5 right-1.5 p-1.5 rounded-lg bg-black/70 hover:bg-[#e63946]/80 text-white/50 hover:text-white transition-all duration-200 backdrop-blur-sm">
                     <X size={10} />
                   </button>
                   <button onClick={() => setShowProjectPicker(true)}
-                    className="absolute bottom-1.5 right-1.5 flex items-center gap-1 px-2 py-1 rounded-lg bg-black/60 hover:bg-white/10 text-white/40 hover:text-white/80 text-[8px] font-bold transition-all">
+                    className="absolute bottom-1.5 right-1.5 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-black/70 hover:bg-white/15 text-white/40 hover:text-white/80 text-[8px] font-bold transition-all duration-200 backdrop-blur-sm">
                     <FolderOpen size={9} /> Cambiar
                   </button>
                 </div>
               )}
               {logoSrc && (<>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {['front','back'].map(s => (
-                    <button key={s} onClick={() => setLogoSide(s)}
-                      className={`py-1.5 rounded-lg text-[10px] font-bold border transition-all ${logoSide === s ? 'bg-[#e63946]/15 border-[#e63946]/40 text-[#e63946]' : 'bg-white/4 border-white/8 text-white/30 hover:text-white/50'}`}>
-                      {s === 'front' ? 'Pecho' : 'Espalda'}
-                    </button>
-                  ))}
-                </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {['front','back'].map(s => (
+                      <button key={s} onClick={() => setLogoSide(s)}
+                        className={`py-2 rounded-lg text-[10px] font-bold border transition-all duration-200 ${logoSide === s ? 'bg-[#e63946]/15 border-[#e63946]/35 text-[#e63946] shadow-[0_0_8px_rgba(230,57,70,0.15)]' : 'bg-white/[0.03] border-white/8 text-white/30 hover:text-white/50 hover:border-white/15'}`}>
+                        {s === 'front' ? 'Pecho' : 'Espalda'}
+                      </button>
+                    ))}
+                  </div>
                 <Slider label="Tamaño"     value={logoScale} min={5}  max={35} onChange={setLogoScale} unit="%" />
                 <Slider label="Posición X" value={logoX}     min={20} max={80} onChange={setLogoX}     unit="%" />
                 <Slider label="Posición Y" value={logoY}     min={10} max={65} onChange={setLogoY}     unit="%" />
@@ -1238,10 +1248,17 @@ export function HerramientaJersey3D() {
         </aside>
 
         {/* 3D viewport */}
-        <div className="flex-1 relative overflow-hidden">
+        <div className="flex-1 relative overflow-hidden bg-[#0a0a0e]">
           <div ref={mountRef} className="w-full h-full" />
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/45 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/6 pointer-events-none">
-            <span className="text-[9.5px] text-white/35 font-medium tracking-wide">Arrastra · rotar &nbsp;|&nbsp; Scroll · zoom &nbsp;|&nbsp; Click derecho · desplazar</span>
+          {/* Subtle corner glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(230,57,70,0.03) 0%, transparent 60%)' }} />
+          {/* Controls hint */}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/50 backdrop-blur-md px-5 py-2 rounded-full border border-white/8 pointer-events-none shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <span className="text-[9px] text-white/30 font-medium tracking-wider">Arrastra · rotar</span>
+            <div className="w-px h-3 bg-white/10" />
+            <span className="text-[9px] text-white/30 font-medium tracking-wider">Scroll · zoom</span>
+            <div className="w-px h-3 bg-white/10" />
+            <span className="text-[9px] text-white/30 font-medium tracking-wider">Click der. · mover</span>
           </div>
         </div>
       </div>
